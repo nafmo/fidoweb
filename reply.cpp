@@ -120,6 +120,11 @@ int main(void)
     // Open the PKT file for writing.
     FILE *f = fopen(path, "wb");
 
+    if (!f)
+    {
+        htmlerror(CANNOTCREATE, "reply packet");
+    }
+
     // Print out some fancy HTML code.
     cout << "Content-type: text/html" << endl;
     cout << endl;
