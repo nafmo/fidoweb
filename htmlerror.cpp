@@ -21,43 +21,56 @@
 
 struct
 {
-    const string title, message;
+    const string title, message1, message2;
 } errors[] =
 {
     { "Bad request method",
       "The document was requested incorrectly. Please check the referring "
-      "document for errors." },
+      "document for errors.",
+      "" },
     { "Unkown area",
-      "The area you tried to access was not found. Please check the "
-      "referring document for errors. The area you tried to access was " },
+      "The area you tried to access, ",
+      ", was not found. Please check the "
+      "referring document for errors." },
     { "Cannot open area",
-      "The area you tried to access could not be read. It probably is "
-      "being accessed by another process. Please try again. If the problem "
-      "persists, please contact the SysOp, stating the full area path: " },
+      "The area you tried to access, ",
+      ", could not be read. "
+      "It probably is being accessed by another process. "
+      "Please try again. If the problem "
+      "persists, please contact the SysOp." },
     { "Nonexisting UMSGID",
-      "The message you tried to access does not exist. It might have "
-      "expired. If you think this problem is issued in error, please "
-      "contact the SysOp, stating the UMSGID number " },
+      "The message you tried to access (UMSGID ",
+      ") does not exist. It might have expired. "
+      "If you think this problem is issued in error, please "
+      "contact the SysOp." },
     { "Nonexisting message",
-      "The message you tried to access does not exist. It might have "
-      "expired. If you think this problem is issued in error, please "
-      "contact the SysOp, stating the local message number " },
+      "The message you tried to access (# ",
+      ") does not exist. "
+      "It might have expired. "
+      "If you think this problem is issued in error, please "
+      "contact the SysOp." },
     { "Out of memory",
-      "The system ran out of memory when trying to allocate memory for " },
+      "The system ran out of memory when trying to allocate memory for ",
+      "" },
     { "No parameters given",
       "Required arguments are missing from the request. Please check "
-      "the referring document for errors." },
+      "the referring document for errors.",
+      "" },
     { "Illegal parameter format",
-      "The document was requested with illegal arguments: " },
+      "The document was requested with illegal arguments: ",
+      ". Please check the referring document for errors." },
     { "Required parameter missing",
-      "The document was requested without the required parameter " },
+      "The document was requested without the required parameter ",
+      ". Please check the referring document for errors." },
     { "Not logged in",
-      "You must be correctly logged in to access this function." },
+      "You must be correctly logged in to access this function.",
+      "" },
 
     { "Incorrect error message",
       "An error occured, and when the program tried to tell it, something "
       "else went wrong. This should not happen. If it did anyway, please "
-      "contact the SysOp, stating exactly what you did." }
+      "contact the SysOp, stating exactly what you did.",
+      "" }
 };
 
 void htmlerror(int error, const string data)
@@ -79,7 +92,8 @@ void htmlerror(int error, const string data)
     cout << "<body>" << endl;
     cout << "<h1>An error has occured</h1>" << endl;
     cout << "<p>Your request could not be fulfilled." << endl;
-    cout << "<p>" << errors[error].message << data << endl;
+    cout << "<p>" << errors[error].message1 << data
+         << errors[error].message2 << endl;
     cout << "</html>" << endl;
     exit(0);
 }
