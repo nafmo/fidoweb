@@ -30,15 +30,15 @@
     #endif
 #endif
 
-#if (UCHAR_MAX == 4294967295)
+#if (UCHAR_MAX == 4294967295U)
     typedef unsigned char UINT32;
     typedef signed char SINT32;
 #else
-    #if (USHRT_MAX == 4294967295)
+    #if (USHRT_MAX == 4294967295U)
         typedef unsigned short UINT32;
         typedef signed short SINT32;
     #else
-        #if (UINT_MAX == 4294967295)
+        #if (UINT_MAX == 4294967295U)
             typedef unsigned int UINT32;
             typedef signed int SINT32;
         #else
