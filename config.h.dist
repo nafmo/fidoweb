@@ -34,4 +34,6 @@
 #define DPOINT  0
 #define PASSWD  "PASSWORD"
 
+#define MSGTYPE MSGTYPE_SQUISH
+
 #endif

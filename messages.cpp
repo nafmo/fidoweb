@@ -84,7 +84,7 @@ void display(string area, unsigned msgno, bool framed)
 
     // Open the area
     HAREA areahandle;
-    word msgtype = MSGTYPE_SQUISH;
+    word msgtype = MSGTYPE;
 
     areahandle = MsgOpenArea((unsigned char *) areapath, MSGAREA_NORMAL,
                              msgtype);
