@@ -1,0 +1,57 @@
+# Makefile for OS/2, EMX and IBM nmake
+#
+# $Id$
+
+CFLAGS=-Wall -Ismapi -Lsmapi -O3 -DUNIX
+
+all: reader.exe arealist.exe messages.exe new.exe reply.exe
+#	cp reader.exe d:\apache_1.3.6\htdocs\webbbbs
+#	cp arealist.exe d:\apache_1.3.6\htdocs\webbbbs
+#	cp messages.exe d:\apache_1.3.6\htdocs\webbbbs
+#	cp new.exe d:\apache_1.3.6\htdocs\webbbbs
+#	cp reply.exe d:\apache_1.3.6\htdocs\webbbbs
+
+reader.exe: reader.o charset.o convert.o select.o getarg.o lastread.o
+	gcc $(CFLAGS) -o reader.exe reader.o charset.o convert.o getarg.o select.o lastread.o -lsmapilnx -lstdc++
+
+reader.o: reader.cpp charset.h select.h convert.h config.h lastread.h
+	gcc $(CFLAGS) -c reader.cpp
+
+charset.o: charset.c config.h
+	gcc $(CFLAGS) -c charset.c
+
+convert.o: convert.cpp config.h
+	gcc $(CFLAGS) -c -o convert.o convert.cpp
+
+convert_.o: convert.cpp config.h
+	gcc -DONLYTRANS -O3 -c -o convert_.o convert.cpp
+
+getarg.o: getarg.cpp config.h
+	gcc $(CFLAGS) -c getarg.cpp
+
+select.o: select.cpp select.h config.h
+	gcc $(CFLAGS) -c select.cpp
+
+arealist.exe: arealist.o getarg.o config.h
+	gcc $(CFLAGS) -o arealist.exe arealist.o getarg.o -lstdc++
+
+arealist.o: arealist.cpp config.h
+	gcc $(CFLAGS) -c arealist.cpp
+
+messages.exe: messages.o select.o charset.o convert.o getarg.o lastread.o
+	gcc $(CFLAGS) -o messages.exe messages.o select.o charset.o convert.o getarg.o lastread.o -lsmapilnx -lstdc++
+
+messages.o: messages.cpp config.h lastread.h
+	gcc $(CFLAGS) -c messages.cpp
+
+new.exe: new.o getarg.o
+	gcc $(CFLAGS) -o new.exe new.o getarg.o -lstdc++
+
+new.o: new.cpp config.h
+	gcc $(CFLAGS) -c new.cpp
+
+lastread.o: lastread.cpp lastread.h config.h
+	gcc $(CFLAGS) -c lastread.cpp
+
+reply.exe: reply.o replycgi.o convert_.o config.h
+	gcc $(CFLAGS) -o reply.exe reply.o replycgi.o convert_.o -lstdc++
