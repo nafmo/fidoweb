@@ -317,7 +317,7 @@ void display(string area, int msgno, bool framed, bool pre, bool reply,
         cout << " <tr><td align=center>[ <a href=\"messages.exe?area="
              << area << "&amp;start=" << lmsgno
              << (framed ? "&amp;frame=1\" target=\"upper\">"
-                          "Update message list</a> |"
+                          "List</a> |"
                         : "\">List</a> ]") << endl;
 
         cout << "<th align=right valign=top>To:<td valign=top>"
