@@ -803,8 +803,8 @@ void writeform(XMSG &msg, const unsigned int *trans, string &area,
         // The upper half.
         string subject = conv(msg.subj, trans);
         if (subject == string("")) subject = string("(missing)");
-		if (subject.substr(0, 4) == string("Re: "))
-			subject = subject.substr(5);
+        if (subject.substr(0, 4) == string("Re: "))
+            subject = subject.substr(4);
 
         cout << "<form action=\"reply.exe\" method=\"post\" "
              << (framed ? "target=\"_new\"" : "")
