@@ -2,7 +2,7 @@
 #
 # $Id$
 
-CFLAGS=-Wall -Zomf -Ismapi -Lsmapi -O3 -fomit-frame-pointer -fstrength-reduce -fno-rtti -fno-exceptions -static
+CFLAGS=-Wall -Ismapi -Lsmapi -O3 -fomit-frame-pointer -fstrength-reduce -fno-rtti -fno-exceptions -static
 # -Zcrtdll
 
 all: reader.exe arealist.exe messages.exe new.exe reply.exe
@@ -12,49 +12,46 @@ all: reader.exe arealist.exe messages.exe new.exe reply.exe
         cp new.exe d:\apache_1.3.6\htdocs\webbbbs
         cp reply.exe d:\apache_1.3.6\htdocs\webbbbs
 
-reader.exe: reader.obj charset.obj convert.obj select.obj getarg.obj lastread.obj htmlerror.obj
-        gcc $(CFLAGS) -o reader.exe reader.obj charset.obj convert.obj getarg.obj select.obj lastread.obj htmlerror.obj reader.def -lsmapiemo -lstdcpp
+reader.exe: reader.o charset.o convert.o select.o getarg.o lastread.o htmlerror.o
+        gcc $(CFLAGS) -o reader.exe reader.o charset.o convert.o getarg.o select.o lastread.o htmlerror.o reader.def -lsmapiemo -lstdcpp
 
-reader.obj: reader.cpp charset.h select.h convert.h config.h lastread.h
+reader.o: reader.cpp charset.h select.h convert.h config.h lastread.h
         gcc $(CFLAGS) -c reader.cpp
 
-charset.obj: charset.c config.h
-        gcc $(CFLAGS) -c charset.c
-
-convert.obj: convert.cpp config.h
-        gcc $(CFLAGS) -c convert.cpp
+charset.o: charset.cpp config.h
+        gcc $(CFLAGS) -c charset.cpp
 
 convert.o: convert.cpp config.h
-        gcc -DONLYTRANS -O3 -c convert.cpp
+        gcc $(CFLAGS) -c convert.cpp
 
-getarg.obj: getarg.cpp config.h
+getarg.o: getarg.cpp config.h
         gcc $(CFLAGS) -c getarg.cpp
 
-select.obj: select.cpp select.h config.h
+select.o: select.cpp select.h config.h
         gcc $(CFLAGS) -c select.cpp
 
-arealist.exe: arealist.obj getarg.obj htmlerror.obj config.h
-        gcc $(CFLAGS) -o arealist.exe arealist.obj getarg.obj htmlerror.obj reader.def -lstdcpp
+arealist.exe: arealist.o getarg.o htmlerror.o config.h
+        gcc $(CFLAGS) -o arealist.exe arealist.o getarg.o htmlerror.o reader.def -lstdcpp
 
-arealist.obj: arealist.cpp config.h
+arealist.o: arealist.cpp config.h
         gcc $(CFLAGS) -c arealist.cpp
 
-messages.exe: messages.obj select.obj charset.obj convert.obj getarg.obj lastread.obj htmlerror.obj
-        gcc $(CFLAGS) -o messages.exe messages.obj select.obj charset.obj convert.obj getarg.obj lastread.obj htmlerror.obj reader.def -lsmapiemo -lstdcpp
+messages.exe: messages.o select.o charset.o convert.o getarg.o lastread.o htmlerror.o
+        gcc $(CFLAGS) -o messages.exe messages.o select.o charset.o convert.o getarg.o lastread.o htmlerror.o reader.def -lsmapiemo -lstdcpp
 
-messages.obj: messages.cpp config.h lastread.h
+messages.o: messages.cpp config.h lastread.h
         gcc $(CFLAGS) -c messages.cpp
 
-new.exe: new.obj getarg.obj htmlerror.obj
-        gcc $(CFLAGS) -o new.exe new.obj getarg.obj htmlerror.obj reader.def -lstdcpp
+new.exe: new.o getarg.o htmlerror.o
+        gcc $(CFLAGS) -o new.exe new.o getarg.o htmlerror.o reader.def -lstdcpp
 
-new.obj: new.cpp config.h
+new.o: new.cpp config.h
         gcc $(CFLAGS) -c new.cpp
 
-lastread.obj: lastread.cpp lastread.h config.h
+lastread.o: lastread.cpp lastread.h config.h
         gcc $(CFLAGS) -c lastread.cpp
 
-htmlerror.obj: htmlerror.cpp htmlerror.h
+htmlerror.o: htmlerror.cpp htmlerror.h
         gcc $(CFLAGS) -c htmlerror.cpp
 
 reply.exe: reply.o replycgi.o convert.o config.h htmlerror.o
