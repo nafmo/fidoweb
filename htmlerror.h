@@ -30,8 +30,9 @@
 #define ILLEGALFORMAT 7
 #define MISSINGPARAM 8
 #define NOTLOGGEDIN 9
+#define CANNOTCREATE 10
 
-#define MAXERROR 10
+#define MAXERROR 11
 #define BADERROR MAXERROR
 
 void htmlerror(int error, const string data);

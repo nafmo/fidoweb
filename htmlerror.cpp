@@ -22,7 +22,7 @@
 struct
 {
     const string title, message1, message2;
-} errors[] =
+} errors[MAXERROR + 1] =
 {
     { "Bad request method",
       "The document was requested incorrectly. Please check the referring "
@@ -65,6 +65,10 @@ struct
     { "Not logged in",
       "You must be correctly logged in to access this function.",
       "" },
+    { "Unable to create file",
+      "Unable to create ",
+      ". Please try again. If the problem persists, please contact "
+      "the SysOp." },
 
     { "Incorrect error message",
       "An error occured, and when the program tried to tell it, something "
