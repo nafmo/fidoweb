@@ -55,13 +55,10 @@ htmlerror.o: htmlerror.cpp htmlerror.h
         gcc $(CFLAGS) -c htmlerror.cpp
 
 reply.exe: reply.o replycgi.o convert.o config.h htmlerror.o
-        gcc -O3 -o reply.exe reply.o replycgi.o convert.o htmlerror.o reader.def -lstdcpp
+        gcc $(CFLAGS) -o reply.exe reply.o replycgi.o convert.o htmlerror.o reader.def -lstdcpp
 
 reply.o: reply.cpp datatyp.h pkthead.h config.h
-        gcc -O3 -c reply.cpp
+        gcc $(CFLAGS) -c reply.cpp
 
 replycgi.o: replycgi.cpp config.h
-        gcc -O3 -c replycgi.cpp
-
-htmlerror.o: htmlerror.cpp htmlerror.h
-        gcc -O3 -c htmlerror.cpp
+        gcc $(CFLAGS) -c replycgi.cpp
