@@ -467,10 +467,6 @@ void display(string area, int msgno, bool framed, bool pre, bool reply,
                     }
                 }
 
-                // We're done with the line, so we don't need to know
-                // that it's a kludge anymore
-                iskludge = false;
-
                 // If we were at the first line, indicate that we aren't
                 // any longer, and if we weren't, then skip over the CR
                 if (!isfirst) p ++;
@@ -513,6 +509,10 @@ void display(string area, int msgno, bool framed, bool pre, bool reply,
                         cout << "&gt; ";
                     }
                 }
+
+                // We're done with the line, so we don't need to know
+                // that it's a kludge anymore
+                iskludge = false;
 
                 // The SEEN-BY control line does not start with a 0x01
                 // character, so it needs to be located especially.
@@ -803,6 +803,8 @@ void writeform(XMSG &msg, const unsigned int *trans, string &area,
         // The upper half.
         string subject = conv(msg.subj, trans);
         if (subject == string("")) subject = string("(missing)");
+		if (subject.substr(0, 4) == string("Re: "))
+			subject = subject.substr(5);
 
         cout << "<form action=\"reply.exe\" method=\"post\" "
              << (framed ? "target=\"_new\"" : "")
