@@ -1,3 +1,24 @@
+// Copyright (c) 1999 Peter Karlsson
+//
+// $Id$
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, version 2
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+#include <string.h>
+
+#include "charset.h"
+
 const unsigned int c_437[] = {
     0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
     16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31,
@@ -165,3 +186,68 @@ const unsigned int c_macroman[] = {
     729, 730, 184, 733, 731, 711
 };
 
+// Check character set
+// input: ctrlbuf - pointer to message control information
+// output: pointer to translation table
+const unsigned int *chrscheck(char *ctrlbuf)
+{
+    char *p;
+
+    // Codepage 437 is fallback
+    const unsigned int *trans = c_437;
+
+    // Locate CHRS: control information
+    p = strstr(ctrlbuf, "\x1""CHRS: ");
+    if (p && *p)
+    {
+        p += 7;
+
+        // Check for known character sets.
+        if (0 == strncmp(p, "IBMPC", 5) ||
+            0 == strncmp(p, "CP437", 5))
+        {
+            // "CHRS: IBMPC" may have an additional "CODEPAGE:"
+            // specifier (FD*).
+            p = strstr(ctrlbuf, "\x1""CODEPAGE: ");
+            if (p)
+            {
+                p += 11;
+                if (0 == strncmp(p, "850", 3)) trans = c_850;
+                else trans = c_437;
+            }
+            else
+                trans = c_437;
+        }
+        else if (0 == strncmp(p, "+7_FIDO", 7) ||
+            0 == strncmp(p, "CP866", 5))
+        {
+            trans = c_866;
+        }
+        else if (0 == strncmp(p, "CP737", 5))
+        {
+            trans = c_737;
+        }
+        else if (0 == strncmp(p, "CP850", 5))
+        {
+            trans = c_850;
+        }
+        else if (0 == strncmp(p, "SWEDISH", 7))
+        {
+            trans = c_646_se;
+        }
+        else if (0 == strncmp(p, "LATIN-1", 7))
+        {
+            trans = c_8859_1;
+        }
+        else if (0 == strncmp(p, "MAC", 3))
+        {
+            trans = c_macroman;
+        }
+        else if (0 == strncmp(p, "ATARI", 5))
+        {
+            trans = c_atarist;
+        }
+    }
+
+    return trans;
+}

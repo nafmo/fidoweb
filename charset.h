@@ -27,4 +27,6 @@ extern const unsigned int c_8859_1[];
 extern const unsigned int c_atarist[];
 extern const unsigned int c_macroman[];
 
+const unsigned int *chrscheck(char *ctrlbuf);
+
 #endif

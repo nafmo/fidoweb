@@ -21,6 +21,5 @@
 #include <string>
 
 string conv(unsigned char *s, const unsigned int *tbl);
-const unsigned int *chrscheck(char *ctrlbuf);
 
 #endif
