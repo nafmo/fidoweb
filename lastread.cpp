@@ -23,6 +23,7 @@
 #else
 # include <unistd.h>
 #endif
+#include <string.h>
 
 #include "config.h"
 #include "lastread.h"
@@ -44,6 +45,11 @@ unsigned getlastread(string name, string echo)
         input.getline(iname, 256);
         if (input.eof()) break;
         input.getline(iread, 256);
+
+#ifdef UNIX
+        if ('\r' == iname[strlen(iname) - 1])
+            iname[strlen(iname) - 1] = 0;
+#endif
 
         if (echo == iname)
         {
@@ -108,6 +114,11 @@ void setlastread(string name, string echo, unsigned msgno)
             if (input.eof()) break;
             output << iname << endl;
             input.getline(iread, 256);
+
+#ifdef UNIX
+        if ('\r' == iname[strlen(iname) - 1])
+            iname[strlen(iname) - 1] = 0;
+#endif
 
             if (echo == iname)
             {
