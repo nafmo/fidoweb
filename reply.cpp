@@ -304,9 +304,9 @@ int main(void)
     {
         originf.getline(originp, 256);
         originf.close();
-        if (originp[strlen(originp) - 1] = '\n')
+        if (originp[strlen(originp) - 1] == '\n')
             originp[strlen(originp) - 1] = 0;
-        if (originp[strlen(originp) - 1] = '\r')
+        if (originp[strlen(originp) - 1] == '\r')
             originp[strlen(originp) - 1] = 0;
     }
     else
