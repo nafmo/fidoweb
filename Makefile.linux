@@ -1,4 +1,4 @@
-# Makefile for OS/2, EMX and IBM nmake
+# Makefile for Linux, GNU C++ and GNU make
 #
 # $Id$
 
@@ -17,14 +17,11 @@ reader.exe: reader.o charset.o convert.o select.o getarg.o lastread.o htmlerror.
 reader.o: reader.cpp charset.h select.h convert.h config.h lastread.h
 	gcc $(CFLAGS) -c reader.cpp
 
-charset.o: charset.c config.h
-	gcc $(CFLAGS) -c charset.c
+charset.o: charset.cpp config.h
+	gcc $(CFLAGS) -c charset.cpp
 
 convert.o: convert.cpp config.h
-	gcc $(CFLAGS) -c -o convert.o convert.cpp
-
-convert_.o: convert.cpp config.h
-	gcc -DONLYTRANS -O3 -c -o convert_.o convert.cpp
+	gcc $(CFLAGS) -c convert.cpp
 
 getarg.o: getarg.cpp config.h
 	gcc $(CFLAGS) -c getarg.cpp
@@ -53,8 +50,8 @@ new.o: new.cpp config.h
 lastread.o: lastread.cpp lastread.h config.h
 	gcc $(CFLAGS) -c lastread.cpp
 
-reply.exe: reply.o replycgi.o convert_.o config.h htmlerror.o
-	gcc $(CFLAGS) -o reply.exe reply.o replycgi.o convert_.o htmlerror.o -lstdc++
+reply.exe: reply.o replycgi.o convert.o config.h htmlerror.o
+	gcc $(CFLAGS) -o reply.exe reply.o replycgi.o convert.o htmlerror.o -lstdc++
 
 htmlerror.o: htmlerror.cpp htmlerror.h
 	gcc $(CFLAGS) -c htmlerror.cpp
