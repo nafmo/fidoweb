@@ -3,3 +3,5 @@
 * Read-only areas
 * Original only areas
 * Better lastread handling
+* The message base access sources should be moved away to a more general
+  library, so that other message base formats can be used

@@ -18,7 +18,11 @@
 #include <fstream.h>
 #include <stdio.h>
 #include <string>
-#include <io.h>
+#ifdef __EMX__
+# include <io.h>
+#else
+# include <unistd.h>
+#endif
 
 #include "config.h"
 #include "lastread.h"

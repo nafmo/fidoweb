@@ -18,7 +18,11 @@
 #include <stdlib.h>
 #include <iostream.h>
 #include <stdio.h>
-#include <io.h>
+#ifdef __EMX__
+# include <io.h>
+#else
+# include <unistd.h>
+#endif
 #include <time.h>
 #include <string.h>
 #include <fstream.h>
@@ -28,6 +32,10 @@
 #include "pkthead.h"
 #define ONLYTRANS
 #include "convert.h"
+
+#ifndef __EMX__
+# define strnicmp strncasecmp
+#endif
 
 // Translation table ISO-8859-1 => Codepage 437
 const unsigned int iso2dos[] = {
@@ -104,7 +112,11 @@ int main(void)
     time_t t = time(NULL);
     char path[256];
     sprintf(path, "%s%08x.pkt", INBOUND, t);
+#ifdef __EMX__
     while (0 == access(path, 0))
+#else
+    while (0 == access(path, F_OK))
+#endif
     {
         // If a PKT file with this name was found, try another name.
         // NOTE: This code can suffer a race condition!

@@ -28,7 +28,7 @@ int main(void)
 {
     // Check if we have a guest user
     char *p = getenv("REMOTE_USER");
-    bool isguest = (strcmp(p, GUEST) == 0);
+    bool isguest = p ? (strcmp(p, GUEST) == 0) : true;
 
     // HTTP preamble
     cout << "Content-type: text/html" << endl;

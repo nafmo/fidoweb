@@ -9,7 +9,8 @@ development snapshot.
 There is no documentation. Use the source, Luke.
 
 I run it under OS/2 Warp 4 and Apache 1.3.6, and compile it with EMX 0.9c,
-your mileage may vary.
+your mileage may vary. I have also adapted it to run under Linux (Debian
+potato unstable snapshot, GNU C++ 2.95.1). You'll need SMAPI to run it.
 
 This stuff is released under the GNU GPL version 2.
 
