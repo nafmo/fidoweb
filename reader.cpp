@@ -33,7 +33,8 @@ extern "C" {
 #include "getarg.h"
 #include "lastread.h"
 
-void display(string area, int msgno, bool framed, bool pre, bool reply);
+void display(string area, int msgno, bool framed, bool pre, bool reply,
+             bool showkludges);
 void writeform(XMSG &msg, const unsigned int *trans, string &area,
                string &msgid, bool, bool);
 
@@ -56,21 +57,24 @@ int main(int argc, char **)
     string frame= getarg("frame", true);
     string pre_s= getarg("pre", true);
     string quo_s= getarg("reply", true);
+    string klu_s= getarg("kludges", true);
 
     bool framed = frame == "1";
     bool pre    = pre_s == "1";
     bool reply  = quo_s == "1";
+    bool kludges= klu_s == "1";
 
     unsigned msgno;
     sscanf(msg.c_str(), "%d", &msgno);
 
-    display(area, msgno, framed, pre, reply);
+    display(area, msgno, framed, pre, reply, kludges);
     return 0;
 }
 
 // display
 // - prints the selected message
-void display(string area, int msgno, bool framed, bool pre, bool reply)
+void display(string area, int msgno, bool framed, bool pre, bool reply,
+             bool showkludges)
 {
     char *p, *qp, *cp;
 
@@ -200,6 +204,10 @@ void display(string area, int msgno, bool framed, bool pre, bool reply)
     // Retrieve high message number
     dword high = MsgHighMsg(areahandle);
 
+    // Locate the previous and next unique message ids.
+    UMSGID prev = MsgMsgnToUid(areahandle, lmsgno - 1),
+           next = MsgMsgnToUid(areahandle, lmsgno + 1);
+
     // Print out HTML header
     cout << "Content-type: text/html" << endl;
     cout << endl;
@@ -254,22 +262,25 @@ void display(string area, int msgno, bool framed, bool pre, bool reply)
         cout << "<table border=0 class=title>" << endl;
 
         cout << " <tr><th align=right valign=top>Area:<td valign=top>" << area
-             << "<th align=right valign=top>Attr:<td valign=top>";
+             << "<th align=right valign=top>Number:<td valign=top>"
+             << lmsgno << '/' << high;
 
-        if (msg.attr & MSGPRIVATE)  cout << "prv ";
-        if (msg.attr & MSGCRASH)    cout << "cra ";
-        if (msg.attr & MSGSENT)     cout << "snt ";
-        if (msg.attr & MSGFILE)     cout << "f/a ";
-        if (msg.attr & MSGFWD)      cout << "tra ";
-        if (msg.attr & MSGORPHAN)   cout << "orp ";
-        if (msg.attr & MSGKILL)     cout << "k/s ";
-        if (msg.attr & MSGLOCAL)    cout << "loc ";
-        if (msg.attr & MSGHOLD)     cout << "hld ";
-        if (msg.attr & MSGFRQ)      cout << "frq ";
-        if (msg.attr & MSGURQ)      cout << "urq ";
-        if (msg.attr & MSGSCANNED)  cout << "scn ";
+        // Link to the following message.
+        if (next && lmsgno < high)
+        {
+            cout << " [ <a href=\"reader.exe?area=" << area << "&amp;msgno="
+                 << next
+                 << "&amp;kludges=" << (showkludges ? '1' : '0')
+                 << (framed ? "&amp;frame=1\"" : "\"")
+                 << ">Next</a> ]";
+        }
+        else // Or back to the area list
+        {
+            cout << " [ <a href=\"arealist.exe?frame="
+                 << (framed ? '1' : '0') <<"\">Areas</a> ]" << endl;
+        }
 
-        cout << (char) 160 << endl;
+        cout << endl;
 
         cout << " <tr><th align=right valign=top>From:<td valign=top>"
              << (me == from ? "<b>" : "")
@@ -306,29 +317,46 @@ void display(string area, int msgno, bool framed, bool pre, bool reply)
 
         cout << " <tr><th align=right valign=top>Subject:<td valign=top>"
              << conv(msg.subj, trans)
-             << " <th align=right valign=top>Number:<td valign=top>"
-             << lmsgno << '/' << high << endl;
+             << " <th align=right valign=top>Attr:<td valign=top>";
+
+        if (msg.attr & MSGPRIVATE)  cout << "prv ";
+        if (msg.attr & MSGCRASH)    cout << "cra ";
+        if (msg.attr & MSGSENT)     cout << "snt ";
+        if (msg.attr & MSGFILE)     cout << "f/a ";
+        if (msg.attr & MSGFWD)      cout << "tra ";
+        if (msg.attr & MSGORPHAN)   cout << "orp ";
+        if (msg.attr & MSGKILL)     cout << "k/s ";
+        if (msg.attr & MSGLOCAL)    cout << "loc ";
+        if (msg.attr & MSGHOLD)     cout << "hld ";
+        if (msg.attr & MSGFRQ)      cout << "frq ";
+        if (msg.attr & MSGURQ)      cout << "urq ";
+        if (msg.attr & MSGSCANNED)  cout << "scn ";
+
+        cout << (char) 160 << endl;
 
         cout << "</table>" << endl;
         cout << "<hr>" << endl;
 
-        // Print control info ("kludge lines")
-        cout << "<small>" << endl;
-        p = ctrlbuf;
-        if (1 == *p) p ++;
-        while (*p)
+        if (showkludges)
         {
-            if (1 == *p)
+            // Print control info ("kludge lines")
+            cout << "<small>" << endl;
+            p = ctrlbuf;
+            if (1 == *p) p ++;
+            while (*p)
             {
-                cout << "<br>" << endl;
-                p ++;
+                if (1 == *p)
+                {
+                    cout << "<br>" << endl;
+                    p ++;
+                }
+                else
+                {
+                    cout << *(p ++);
+                }
             }
-            else
-            {
-                cout << *(p ++);
-            }
+            cout << "</small>";
         }
-        cout << "</small>";
     }
     else
     {
@@ -374,9 +402,8 @@ void display(string area, int msgno, bool framed, bool pre, bool reply)
 
                 // Close the small (or italics) attribute if were reading a
                 // control ("kludge") line
-                if (iskludge && !reply)
+                if (iskludge && !reply && showkludges)
                 {
-                    iskludge = false;
                     if (pre)
                     {
                         cout << "</i>";
@@ -391,7 +418,8 @@ void display(string area, int msgno, bool framed, bool pre, bool reply)
                 if (pre)
                 {
                     // Preformatted display just puts in a linebreak.
-                    cout << endl;
+                    if (!iskludge || showkludges)
+                        cout << endl;
                 }
                 else if (reply)
                 {
@@ -405,11 +433,19 @@ void display(string area, int msgno, bool framed, bool pre, bool reply)
                     // If the line break comes right after the previous one,
                     // we need to fool the HTML parser to do a proper line
                     // break (several <br>s after another collapse into one).
-                    if (lastbreak == p && !isfirst)
-                        cout << ' ';
+                    if (!iskludge || showkludges)
+                    {
+                        if (lastbreak == p && !isfirst)
+                            cout << ' ';
 
-                    cout << "<br>" << endl;
+                        if (showkludges || !isfirst)
+                            cout << "<br>" << endl;
+                    }
                 }
+
+                // We're done with the line, so we don't need to know
+                // that it's a kludge anymore
+                iskludge = false;
 
                 // If we were at the first line, indicate that we aren't
                 // any longer, and if we weren't, then skip over the CR
@@ -458,13 +494,16 @@ void display(string area, int msgno, bool framed, bool pre, bool reply)
                 // character, so it needs to be located especially.
                 if (0 == strncmp(p, "SEEN-BY: ", 9))
                 {
-                    if (pre)
+                    if (showkludges)
                     {
-                        cout << "<i>";
-                    }
-                    else if (!reply)
-                    {
-                        cout << "<small>";
+                        if (pre)
+                        {
+                            cout << "<i>";
+                        }
+                        else if (!reply)
+                        {
+                            cout << "<small>";
+                        }
                     }
                     iskludge = true;
                 }
@@ -476,13 +515,16 @@ void display(string area, int msgno, bool framed, bool pre, bool reply)
                 // We just found ourselves a kludge line.
                 if (!iskludge)
                 {
-                    if (pre)
+                    if (showkludges)
                     {
-                        cout << "<i>";
-                    }
-                    else if (!reply)
-                    {
-                        cout << "<small>";
+                        if (pre)
+                        {
+                            cout << "<i>";
+                        }
+                        else if (!reply)
+                        {
+                            cout << "<small>";
+                        }
                     }
                     iskludge = true;
                 }
@@ -523,10 +565,10 @@ void display(string area, int msgno, bool framed, bool pre, bool reply)
                 // Convert it to ISO 8859-1/Unicode for display.
                 c = trans[(unsigned char) *(p ++)];
 
-                if (reply && iskludge)
+                if ((reply || !showkludges) && iskludge)
                 {
                     // Do nothing if we are reading through a control line
-                    // in reply mode.
+                    // in reply mode or when not showing them.
                 }
                 else if (c == (unsigned int) '<')   // Special care for '<'
                     cout << "&lt;";
@@ -561,7 +603,7 @@ void display(string area, int msgno, bool framed, bool pre, bool reply)
         // Close any left-over tags
         if (endhttp) cout << "</a>" << endl;
         if (iskludge && !reply) cout << "</b>";
-        if (isquote && !reply)
+        if (isquote && !reply && showkludges)
         {
             if (pre)
                 cout << "</i>";
@@ -595,6 +637,8 @@ void display(string area, int msgno, bool framed, bool pre, bool reply)
              << area << "\">" << endl;
         cout << "   <input type=\"hidden\" name=\"msg\" value="
              << msgno << '>' << endl;
+        cout << "   <input type=\"hidden\" name=\"kludges\" value="
+             << (showkludges ? '1' : '0') << '>' << endl;
         cout << "   <input type=\"hidden\" name=\"frame\" value="
              << (framed ? '1' : '0') << '>' << endl;
         cout << "   <input type=\"hidden\" name=\"reply\" value=1>" << endl;
@@ -604,10 +648,6 @@ void display(string area, int msgno, bool framed, bool pre, bool reply)
         cout << " <td valign=top>" << endl;
     }
 
-    // Locate the previous and next unique message ids.
-    UMSGID prev = MsgMsgnToUid(areahandle, lmsgno - 1),
-           next = MsgMsgnToUid(areahandle, lmsgno + 1);
-
     // Close the message and area (we are done with it).
     delete msgbuf;
     delete ctrlbuf;
@@ -615,15 +655,25 @@ void display(string area, int msgno, bool framed, bool pre, bool reply)
     MsgCloseArea(areahandle);
     MsgCloseApi();
 
-    // Provide for an option to display this message preformatted.
+    // Provide for an option to display this message preformatted,
+    // and to show kludges.
     if (allow)
     {
         cout << "  [ <a href=\"reader.exe?area=" << area
              << "&amp;msgno=" << msgno
+             << "&amp;kludges=" << (showkludges ? '1' : '0')
              << (framed ? "&amp;frame=1" : "")
              << ((pre || reply) ? "\">Normal"
                                 : "&amp;pre=1\">Preformatted")
-             << " display</a> |"
+             << "</a> |"
+             << endl;
+
+        cout << "  <a href=\"reader.exe?area=" << area
+             << "&amp;msgno=" << msgno
+             << "&amp;kludges=" << (showkludges ? '0' : '1')
+             << (framed ? "&amp;frame=1\">" : "\">")
+             << (showkludges ? "Hide" : "Show")
+             << " kludges</a> |"
              << endl;
     }
 
@@ -632,6 +682,7 @@ void display(string area, int msgno, bool framed, bool pre, bool reply)
     {
         cout << "  <a href=\"reader.exe?area=" << area << "&amp;msgno="
              << prev
+             << "&amp;kludges=" << (showkludges ? '1' : '0')
              << (framed ? "&amp;frame=1\"" : "\"")
              << ">&lt;--Back</a> |" << endl;
     }
@@ -641,6 +692,7 @@ void display(string area, int msgno, bool framed, bool pre, bool reply)
     {
         cout << "  <a href=\"reader.exe?area=" << area
              << "&amp;msgno=" << msg.replyto
+             << "&amp;kludges=" << (showkludges ? '1' : '0')
              << (framed ? "&amp;frame=1\"" : "\"")
              << ">Original</a> |"
              << endl;
@@ -655,6 +707,7 @@ void display(string area, int msgno, bool framed, bool pre, bool reply)
         {
             cout << "<a href=\"reader.exe?area=" << area
                  << "&amp;msgno=" << msg.replies[i]
+                 << "&amp;kludges=" << (showkludges ? '1' : '0')
                  << (framed ? "&amp;frame=1\"" : "\"")
                  << ">" << i + 1
                  << "</a> " << endl;
@@ -665,6 +718,7 @@ void display(string area, int msgno, bool framed, bool pre, bool reply)
     {
         cout << "  <a href=\"reader.exe?area=" << area
              << "&amp;msgno=" << msg.replies[0]
+             << "&amp;kludges=" << (showkludges ? '1' : '0')
              << (framed ? "&amp;frame=1\"" : "\"")
              << ">Reply</a> |"
              << endl;
@@ -675,6 +729,7 @@ void display(string area, int msgno, bool framed, bool pre, bool reply)
     {
         cout << "  <a href=\"reader.exe?area=" << area << "&amp;msgno="
              << next
+             << "&amp;kludges=" << (showkludges ? '1' : '0')
              << (framed ? "&amp;frame=1\"" : "\"")
              << ">Next--&gt;</a> |" << endl;
     }
@@ -722,6 +777,9 @@ void writeform(XMSG &msg, const unsigned int *trans, string &area,
     if (upper)
     {
         // The upper half.
+        string subject = conv(msg.subj, trans);
+        if (subject == string("")) subject = string("(missing)");
+
         cout << "<form action=\"reply.exe\" method=\"post\" "
              << (framed ? "target=\"_new\"" : "")
              << ">" << endl;
@@ -731,7 +789,7 @@ void writeform(XMSG &msg, const unsigned int *trans, string &area,
              << conv(msg.from, trans) << "\">" << endl;
         cout << " Subject:<br>" << endl;
         cout << " <input type=\"text\" name=\"subject\" value=\""
-             << conv(msg.subj, trans) << "\" maxlen=75 size=75>" << endl;
+             << subject << "\" maxlen=75 size=75>" << endl;
         cout << " <p>Message text:<br>" << endl;
         cout << " <textarea name=\"body\" cols=80 rows=25 wrap=\"virtual\" "
                 "maxlength=32000>" << endl;

@@ -240,6 +240,7 @@ void display(string area, unsigned msgno, bool framed)
             cout << " <tr><td align=right valign=top>"
                     "<a href=\"reader.exe?area="
                  << area << "&amp;msgno=" << uid
+                 << "&amp;kludges=0"
                  << (framed ? "&amp;frame=1\" target=\"lower\"" : "\"")
                  << '>' << msgn
                  << "</a>" << endl;
