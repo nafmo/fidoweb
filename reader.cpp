@@ -261,14 +261,11 @@ void display(string area, int msgno, bool framed, bool pre, bool reply,
         // nicely formatted table
         cout << "<table border=0 class=title>" << endl;
 
-        cout << " <tr><th align=right valign=top>Area:<td valign=top>" << area
-             << "<th align=right valign=top>Number:<td valign=top>"
-             << lmsgno << '/' << high;
-
         // Link to the following message.
         if (next && lmsgno < high)
         {
-            cout << " [ <a href=\"reader.exe?area=" << area << "&amp;msgno="
+            cout << " <tr><td>[ <a href=\"reader.exe?area=" << area
+			     << "&amp;msgno="
                  << next
                  << "&amp;kludges=" << (showkludges ? '1' : '0')
                  << (framed ? "&amp;frame=1\"" : "\"")
@@ -276,13 +273,31 @@ void display(string area, int msgno, bool framed, bool pre, bool reply,
         }
         else // Or back to the area list
         {
-            cout << " [ <a href=\"arealist.exe?frame="
+            cout << " <tr><td>[ <a href=\"arealist.exe?frame="
                  << (framed ? '1' : '0') <<"\">Areas</a> ]" << endl;
         }
 
+        cout << "<th align=right valign=top>Area:<td valign=top>" << area
+             << "<th align=right valign=top>Number:<td valign=top>"
+             << lmsgno << '/' << high;
+
         cout << endl;
 
-        cout << " <tr><th align=right valign=top>From:<td valign=top>"
+		if (prev)
+		{
+            cout << " <tr><td>[ <a href=\"reader.exe?area=" << area
+			     << "&amp;msgno="
+                 << prev
+                 << "&amp;kludges=" << (showkludges ? '1' : '0')
+                 << (framed ? "&amp;frame=1\"" : "\"")
+                 << ">Next</a> ]";
+		}
+		else
+		{
+			cout << " <tr><td>&nbsp;";
+		}
+
+        cout << "<th align=right valign=top>From:<td valign=top>"
              << (me == from ? "<b>" : "")
              << from
              << (me == from ? "</b>" : "");
@@ -297,7 +312,14 @@ void display(string area, int msgno, bool framed, bool pre, bool reply,
                   msg.date_written.time.ss << 1);
         cout << endl;
 
-        cout << " <tr><th align=right valign=top>To:<td valign=top>"
+	    // Link back to the message list for the area.
+	    cout << " <tr><td>[ <a href=\"messages.exe?area=" << area << "&amp;start="
+	         << lmsgno
+	         << (framed ? "&amp;frame=1\" target=\"upper\">"
+	                      "Update message list</a> |"
+	                    : "\">List</a> ]") << endl;
+
+        cout << "<th align=right valign=top>To:<td valign=top>"
              << (me == to   ? "<b>" : "")
              << to
              << (me == to   ? "</b>" : "");
@@ -315,7 +337,8 @@ void display(string area, int msgno, bool framed, bool pre, bool reply,
 
         cout << endl;
 
-        cout << " <tr><th align=right valign=top>Subject:<td valign=top>"
+        cout << " <tr><th align=right valign=top colspan=2>Subject:"
+		        "<td valign=top>"
              << conv(msg.subj, trans)
              << " <th align=right valign=top>Attr:<td valign=top>";
 
