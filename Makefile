@@ -2,7 +2,8 @@
 #
 # $Id$
 
-CFLAGS=-Wall -Zcrtdll -Zomf -Id:/src/turqoise/smapi -Ld:/src/turqoise/smapi -O3
+CFLAGS=-Wall -Zomf -Ismapi -Lsmapi -O3 -fomit-frame-pointer -fstrength-reduce -fno-rtti -fno-exceptions -static
+# -Zcrtdll
 
 all: reader.exe arealist.exe messages.exe new.exe reply.exe
         cp reader.exe d:\apache_1.3.6\htdocs\webbbbs
