@@ -31,6 +31,7 @@ extern "C" {
 #include "select.h"
 #include "getarg.h"
 #include "lastread.h"
+#include "htmlerror.h"
 
 void display(string area, unsigned msgno, bool framed);
 
@@ -39,11 +40,7 @@ int main(int argc, char **)
 {
     if (argc != 1)
     {
-        cout << "Pragma: no-cache" << endl;
-        cout << "Content-type: text/plain" << endl;
-        cout << endl;
-        cout << "Bad request method" << endl;
-        return 0;
+        htmlerror(BADREQUEST, "");
     }
 
     // Retrieve parameters
@@ -76,11 +73,7 @@ void display(string area, unsigned msgno, bool framed)
     char *areapath = getpath(area);
     if (!areapath)
     {
-        cout << "Pragma: no-cache" << endl;
-        cout << "Content-type: text/plain" << endl;
-        cout << endl;
-        cout << "Unknown area: " << area << endl;
-        exit(0);
+        htmlerror(UNKNOWNAREA, area);
     }
 
     // Open the MSGAPI
@@ -98,11 +91,7 @@ void display(string area, unsigned msgno, bool framed)
 
     if (!areahandle)
     {
-        cout << "Pragma: no-cache" << endl;
-        cout << "Content-type: text/plain" << endl;
-        cout << endl;
-        cout << "Cannot open area: " << areapath << endl;
-        exit(0);
+        htmlerror(CANNOTOPENAREA, areapath);
     }
 
     MsgLock(areahandle);

@@ -21,6 +21,7 @@
 #include <iostream.h>
 #include <stdio.h>
 #include "config.h"
+#include "htmlerror.h"
 
 // getarg
 // - retrieves arguments from the QUERY_STRING
@@ -36,11 +37,7 @@ string getarg(char *s, bool optional)
     {
         if (optional) return string("");
 
-        cout << "Pragma: no-cache" << endl;
-        cout << "Content-type: text/plain" << endl;
-        cout << endl;
-        cout << "No parameters" << endl;
-        exit(0);
+        htmlerror(NOPARAMETERS, "");
     }
 
     // Locate the variable in the request
@@ -59,11 +56,7 @@ string getarg(char *s, bool optional)
             {
                 if (optional) return string("");
 
-                cout << "Pragma: no-cache" << endl;
-                cout << "Content-type: text/plain" << endl;
-                cout << endl;
-                cout << "Illegal parameter format: " << s << endl;
-                exit(0);
+                htmlerror(ILLEGALFORMAT, s);
             }
             p ++;
 
@@ -100,10 +93,7 @@ string getarg(char *s, bool optional)
     if (optional) return string("");
 
     // Otherwise we die.
-    cout << "Pragma: no-cache" << endl;
-    cout << "Content-type: text/plain" << endl;
-    cout << endl;
-    cout << "Missing parameter: " << s << endl;
-    exit(0);
+    htmlerror(MISSINGPARAM, s);
+    return 0;
 }
 

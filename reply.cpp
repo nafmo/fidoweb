@@ -30,6 +30,7 @@
 #include "config.h"
 #include "replycgi.h"
 #include "pkthead.h"
+#include "htmlerror.h"
 #define ONLYTRANS
 #include "convert.h"
 
@@ -86,22 +87,14 @@ int main(void)
     if (!getenv("REQUEST_METHOD") ||
         0 != strcmp(getenv("REQUEST_METHOD"), "POST"))
     {
-        cout << "Pragma: no-cache" << endl;
-        cout << "Content-type: text/plain" << endl;
-        cout << endl;
-        cout << "Bad request method" << endl;
-        return 0;
+        htmlerror(BADREQUEST, "");
     }
 
     // Find out who is on the other side.
     char *p = getenv("REMOTE_USER");
     if (!p || strcmp(p, GUEST) == 0)
     {
-        cout << "Pragma: no-cache" << endl;
-        cout << "Content-type: text/plain" << endl;
-        cout << endl;
-        cout << "You've not logged on properly!?!" << endl;
-        return 0;
+        htmlerror(NOTLOGGEDIN, "");
     }
 
     // Collect the user input.
@@ -111,7 +104,7 @@ int main(void)
     // the PKT file name.
     time_t t = time(NULL);
     char path[256];
-    sprintf(path, "%s%08x.pkt", INBOUND, t);
+    sprintf(path, "%s%08x.pkt", INBOUND, (unsigned) t);
 #ifdef __EMX__
     while (0 == access(path, 0))
 #else
@@ -121,7 +114,7 @@ int main(void)
         // If a PKT file with this name was found, try another name.
         // NOTE: This code can suffer a race condition!
         t ++;
-        sprintf(path, "%s%08x.pkt", INBOUND, t);
+        sprintf(path, "%s%08x.pkt", INBOUND, (unsigned) t);
     }
 
     // Open the PKT file for writing.
@@ -265,7 +258,7 @@ int main(void)
             "\1""CHRS: %s\x0d"
             "\1""RFC-User-Agent: %s\x0d",
             area,
-            ZONE, NET, NODE, POINT, t,
+            ZONE, NET, NODE, POINT, (unsigned) t,
             msgid ? "\1""REPLY: " : "",
             msgid ? msgid : "",
             msgid ? "\x0d" : "",
@@ -309,7 +302,6 @@ int main(void)
     char originp[256];
     if (originf.is_open())
     {
-        char line[256] = "";
         originf.getline(originp, 256);
         originf.close();
     }

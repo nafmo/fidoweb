@@ -29,7 +29,7 @@ char *area, *msgid, *name, *subject, *body;
 void readinput(void)
 {
     int         ch;
-    char        buf[BUFFER], hex[3] = "00", *data_p;
+    char        buf[BUFFER], hex[3] = "00", *data_p = NULL;
     unsigned    i = 0;
 
     area = NULL;

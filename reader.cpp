@@ -32,6 +32,7 @@ extern "C" {
 #include "select.h"
 #include "getarg.h"
 #include "lastread.h"
+#include "htmlerror.h"
 
 void display(string area, int msgno, bool framed, bool pre, bool reply,
              bool showkludges);
@@ -43,11 +44,7 @@ int main(int argc, char **)
 {
     if (argc != 1)
     {
-        cout << "Pragma: no-cache" << endl;
-        cout << "Content-type: text/plain" << endl;
-        cout << endl;
-        cout << "Bad request method" << endl;
-        return 0;
+        htmlerror(BADREQUEST, "");
     }
 
     // Retrieve parameters
@@ -97,11 +94,7 @@ void display(string area, int msgno, bool framed, bool pre, bool reply,
     char *areapath = getpath(area);
     if (!areapath)
     {
-        cout << "Pragma: no-cache" << endl;
-        cout << "Content-type: text/plain" << endl;
-        cout << endl;
-        cout << "Unknown area: " << area << endl;
-        exit(0);
+        htmlerror(UNKNOWNAREA, area);
     }
 
     // Open the MSGAPI
@@ -119,11 +112,7 @@ void display(string area, int msgno, bool framed, bool pre, bool reply,
 
     if (!areahandle)
     {
-        cout << "Pragma: no-cache" << endl;
-        cout << "Content-type: text/plain" << endl;
-        cout << endl;
-        cout << "Cannot open area: " << areapath << endl;
-        exit(0);
+        htmlerror(CANNOTOPENAREA, areapath);
     }
 
     MsgLock(areahandle);
@@ -137,23 +126,14 @@ void display(string area, int msgno, bool framed, bool pre, bool reply,
     dword lmsgno = MsgUidToMsgn(areahandle, msgno, UID_EXACT);
     if (!lmsgno)
     {
-        cout << "Pragma: no-cache" << endl;
-        cout << "Content-type: text/plain" << endl;
-        cout << endl;
-        cout << "Non-existing UMSGID: " << msgno << endl;
-        exit(0);
+        htmlerrori(NONEXISTINGUMSGID, msgno);
     }
 
     msghandle = MsgOpenMsg(areahandle, MOPEN_READ, lmsgno);
 
     if (!msghandle)
     {
-        cout << "Pragma: no-cache" << endl;
-        cout << "Content-type: text/plain" << endl;
-        cout << endl;
-        cout << "Non-existing message: " << lmsgno << endl;
-        cout << "Maybe the message has expired?" << endl;
-        exit(0);
+        htmlerrori(NONEXISTINGMESSAGE, lmsgno);
     }
 
     // Check the length of the control information and allocate space for it
@@ -161,11 +141,7 @@ void display(string area, int msgno, bool framed, bool pre, bool reply,
     ctrlbuf = new char[ctrllen];
     if (!ctrlbuf)
     {
-        cout << "Pragma: no-cache" << endl;
-        cout << "Content-type: text/plain" << endl;
-        cout << endl;
-        cout << "Unable to allocate memory for control data" << endl;
-        exit(0);
+        htmlerror(ALLOCATEFAILED, "the control data.");
     }
 
     // Check the length of the message body and allocate space for it
@@ -173,11 +149,7 @@ void display(string area, int msgno, bool framed, bool pre, bool reply,
     msgbuf = new char[msglen];
     if (!msgbuf)
     {
-        cout << "Pragma: no-cache" << endl;
-        cout << "Content-type: text/plain" << endl;
-        cout << endl;
-        cout << "Unable to allocate memory for message body" << endl;
-        exit(0);
+        htmlerror(ALLOCATEFAILED, "the message body.");
     }
 
     // Read message headers, control data and body
